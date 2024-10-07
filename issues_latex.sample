@@ -1,0 +1,29 @@
+\documentclass{minimal}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+
+\begin{document}
+
+This is a reminder of the upcoming NDN Platform call. Starting from Apr 23, 2021, call times are every Friday 09:00-11:00 Pacific Time. Conference calls are organized as a Zoom online meeting: \\ \\
+\url{https://arizona.zoom.us/j/82909523174?pwd=bEc2VXk4M3ZrdC95SGlxUHVzRVFyUT09} \\ \\
+By participating in a call, you consent that the call may be recorded. \\ \\
+The following issues will be discussed in this or future NDN Platform calls: (if you are proposing an issue to discuss, please make sure the post starts with a link to Redmine, Gerrit, mailing list, Dropbox, etc, followed by a concise description not exceeding 3 lines) \\
+\\ \noindent\rule{\textwidth}{1pt} \\ \\ \\
+%START
+Add issues here!
+%END
+\\ \\ \\ \noindent\rule{\textwidth}{1pt} \\ \\
+\noindent If you want to edit the issue list in this document, \href{https://www.google.com/url?q=https://docs.google.com/document/d/1a8yXkYg6AZ6EafUbXsKDXgac_aDZPQU8t5Q3p2I1K5M/edit?usp%3Dsharing&sa=D&source=editors&ust=1720823767173225&usg=AOvVaw0qYjqFv9Fw4wmNwM4eS5MC}{request permission on Google Drive.} \textbf{Please only edit between the START and END comments.} Each issue should start with a link (Redmine, Gerrit, mailing list, Dropbox, etc), followed by a concise description not exceeding 3 lines. If you feel you need a longer description, post it to Redmine or nfd-dev mailing list, or place it in your Dropbox / Google Drive / OneDrive and paste the link here. Do not post discussions in this document. \\ \\
+This document is emailed automatically 20 hours before the regular start time of each NDN Platform call. Contact \href{https://www.google.com/url?q=https://www.cs.arizona.edu/~shijunxiao/&sa=D&source=editors&ust=1720823767173736&usg=AOvVaw2S_owGIUy4U6V8viP2TspP}{Junxiao} if you need to subscribe to or unsubscribe from the automated email distribution. \\ \\
+Please do not reply or forward the email distribution, because multiple replies on different topics under the same subject would be messy and unmanageable. To discuss an issue, post a note on the relevant Redmine issue (remember to write Markdown syntax and use the "Preview" button before submitting) or send an email (with a descriptive title) to the nfd-dev mailing list.
+
+\end{document}

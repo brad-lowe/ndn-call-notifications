@@ -2,12 +2,14 @@ import { load as loadDotenv } from 'https://deno.land/std@0.214.0/dotenv/mod.ts'
 import { sleep } from 'https://deno.land/x/sleep@v1.3.0/mod.ts';
 import { InMemoryStorage } from '@ucla-irl/ndnts-aux/storage';
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace';
+import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors';
+import { SyncAgent } from '@ucla-irl/ndnts-aux/sync-agent';
 import { AsyncDisposableStack, base64ToBytes } from '@ucla-irl/ndnts-aux/utils';
 import { CertStorage } from '@ucla-irl/ndnts-aux/security';
 import { Decoder } from '@ndn/tlv';
 import { Component, Data, Name, ValidityPeriod } from '@ndn/packet';
 import { Certificate, CertNaming, createSigner, createVerifier, ECDSA } from '@ndn/keychain';
-// import { WsTransport } from '@ndn/ws-transport';
+import { WsTransport } from '@ndn/ws-transport';
 import { TcpTransport, UdpTransport, UnixTransport } from '@ndn/node-transport';
 import { digestSigning, Signer } from '@ndn/packet';
 import * as nfdmgmt from '@ndn/nfdmgmt';
@@ -16,11 +18,14 @@ import { fchQuery } from '@ndn/autoconfig';
 import * as Y from 'yjs';
 import { produce } from '@ndn/endpoint';
 import { fromHex } from '@ndn/util';
+import { syncedStore, getYjsDoc } from '@syncedstore/core'
+import * as fs from 'fs'
+import * as nodemailer from 'nodemailer'
 
 // Global configurations
 let DEBUG = false;
 // const UPDATE_INTERVAL = [300, 1000];
-const UPDATE_INTERVAL = [100, 101];
+const UPDATE_INTERVAL = [10, 11];
 const MAX_SEQUENCE = 1000;
 const PAYLOAD_LENGTH = 100;
 const LOCAL = true;
@@ -79,8 +84,8 @@ const issue = async (idName: Name, issuerPrivateKey: Signer): Promise<[Signer, C
 const doFch = async () => {
   try {
     const fchRes = await fchQuery({
-      // transport: 'wss',
-      transport: 'tcp', // Cannot use TCP/UDP due to prefix registration failure
+      transport: 'wss',
+      // transport: 'tcp', // Cannot use TCP/UDP due to prefix registration failure
       network: 'ndn',
     });
 
@@ -134,21 +139,13 @@ const registerPrefixes = async (fw: Forwarder, workspaceName: Name, nodeId: Name
   }
 };
 
-type ItemType = {
-  nodeId: string;
-  timestamp: number;
-  seq: number;
-  delta?: number;
-  payload?: string;
-};
-
 const main = async () => {
   const testbedCertB64 = Deno.env.get('TESTBED_CERT');
   const testbedPrvKeyB64 = Deno.env.get('TESTBED_PRVKEY');
   const caCertB64 = Deno.env.get('WORKSPACE_CA_CERT');
   const caPrvKeyB64 = Deno.env.get('WORKSPACE_CA_PRVKEY');
   const nodeIdInt = parseInt(Deno.env.get('NODE_ID') ?? '0');
-  const host = Deno.env.get('HOST') ?? '';
+  // const host = Deno.env.get('HOST') ?? '';
 
   await using closers = new AsyncDisposableStack();
 
@@ -162,11 +159,11 @@ const main = async () => {
   const nodeId = workspaceName.append(nodeIdStr);
   const [_mySigner, myCert, myKeyBits] = await issue(nodeId, caSigner);
   console.log(`[${nodeIdInt}]My Cert: ${myCert.name.toString()} \n  Period: ${myCert.validity.toString()}`);
-  console.log(`[${nodeIdInt}]DEST: ${host}`);
+  // console.log(`[${nodeIdInt}]DEST: ${host}`);
 
   // Connect to testbed
   const fw = Forwarder.getDefault();
-  // const host = await doFch();
+  const host = await doFch();
   // const wsUrl = `wss://${host}/ws/`;
   // const wsFace = await WsTransport.createFace({ l3: { local: false }, fw }, wsUrl);
   let face;
@@ -174,10 +171,10 @@ const main = async () => {
     if (LOCAL) {
       face = await UnixTransport.createFace({ l3: { local: true }, fw }, '/var/run/nfd/nfd.sock');
     } else {
-      // const wsUrl = `wss://${host}/ws/`;
-      // face = await WsTransport.createFace({ l3: { local: false }, fw }, wsUrl);
+      const wsUrl = `wss://${host}/ws/`;
+      face = await WsTransport.createFace({ l3: { local: false }, fw }, wsUrl);
       // face = await TcpTransport.createFace({ l3: { local: false }, fw }, { host, port: 6363 });
-      face = await UdpTransport.createFace({ l3: { local: false }, fw }, { host });
+      // face = await UdpTransport.createFace({ l3: { local: false }, fw }, { host });
     }
   } catch (err) {
     console.error(`[${nodeIdInt}]Unable to connect: ${host}: ${err}`);
@@ -206,50 +203,119 @@ const main = async () => {
     return;
   }
 
+  function initRootDoc(guid: string) {
+    return syncedStore(
+      {
+        latex: {},
+        chats: [],
+      },
+      new Y.Doc({ guid }),
+    )
+  }
+
+  let yDoc = new Y.Doc();
+
   // Run workspace
-  const rootDoc = new Y.Doc();
+  let rootDoc = initRootDoc("00000000-0000-0000-0000-000000000001");
+  console.log(rootDoc);
+
+  yDoc = getYjsDoc(rootDoc);
+
+  const createNewDoc: (() => Promise<void>) | undefined = async () => {
+    if (!rootDoc) return
+
+    yDoc = getYjsDoc(rootDoc);
+    const clientID = yDoc.clientID;
+    yDoc.clientID = 1;
+    rootDoc.latex["00000000-0000-0000-0000-000000000000"] = {
+      id: "00000000-0000-0000-0000-000000000000",
+      name: '',
+      parentId: undefined,
+      kind: 'folder',
+      items: [],
+    };
+    yDoc.clientID = clientID;
+  }
+
   const workspace = await Workspace.create({
     nodeId: nodeId,
     persistStore: storage,
-    fw,
-    rootDoc: rootDoc,
+    fw: fw,
+    rootDoc: getYjsDoc(rootDoc),
     signer: certStore.signer,
     verifier: certStore.verifier,
-    useBundler: false,
-    groupKeyBits: groupKeyBits,
-  });
+    createNewDoc: createNewDoc,
+    useBundler: true,
+  })
+
   closers.defer(() => workspace.destroy());
   console.log(`[${nodeIdInt}]Workspace started.`);
 
-  // Set array
-  const arr = rootDoc.getArray('my array');
-  let seqNum = 0;
-  const push = () => {
-    arr.push([JSON.stringify(
-      {
-        nodeId: nodeIdStr,
-        timestamp: Date.now(),
-        seq: seqNum++,
-        payload: payloadValue,
-      } satisfies ItemType,
-    )]);
-  };
+  await sleep(5);
 
-  // Observe log
-  const logRecords = [] as Array<ItemType>;
-  arr.observe((event) => {
-    for (const item of event.changes.added) {
-      const val = JSON.parse(item.content.getContent()[0]) as ItemType;
-      const { nodeId, timestamp } = val;
-      if (nodeId === nodeIdStr || !nodeId) {
-        continue;
-      }
-      const timeNow = Date.now();
-      const delta = timeNow - timestamp;
-      // console.log(`[${nodeId} : ${seq}] Delta: ${delta} ms`);
-      logRecords.push({ ...val, delta });
+  // Get underlying text from the yDoc
+  let yMap = yDoc.getMap('latex')
+  let mainTex = yMap.get('0cf7f234-06cf-4a15-8aa6-7a97ec49cbbc')
+  let inner = mainTex.get('text')
+  let allText = inner.toString()
+
+  // Find issues from text
+  let startString = "%START"
+  let issueStart = allText.indexOf(startString) + startString.length
+
+  let endString = "%END"
+  let issueEnd = allText.indexOf(endString)
+
+  let issueText = allText.substring(issueStart, issueEnd)
+  console.log(issueText)
+
+  // Read email sample and insert issues
+
+  let email = fs.readFileSync('./mail-template.html', 'utf-8');
+
+  const hr1 = email.indexOf("<hr>") + 4
+  const hr2 = email.indexOf("<hr>", hr1)
+
+  email = email.substring(0, hr1) + "\n<p>\n" + issueText + "\n</p>\n" + email.substring(hr2)
+
+  console.log(email)
+
+  // Send email via nodemailer
+
+  // from: "noreply@named-data.net"
+  // to:   "bradlowe@g.ucla.edu"
+  // subject: NDN Weekly Call
+  // address: "YOUR.SMTP.SERVER"
+  // domain:  "named-data.net"
+  // port: 587
+  // user_name: "login"
+  // password: "password"
+
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'bradlowe@g.ucla.edu',
+      pass: 'fxka ifzx uoyq dqnt'
     }
   });
+
+  var mailOptions = {
+    from: 'bradlowe@ucla.edu',
+    to: 'bradlowe@g.ucla.edu',
+    subject: 'NDN Weekly Call TEST EMAIL',
+    html: email
+  };
+
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+  
+  
+
 
   // Exit signal
   let stop = false;
@@ -260,34 +326,14 @@ const main = async () => {
     exitResolve();
   });
 
-  // Random push
-  const runner = (async () => {
-    const [lower, upper] = UPDATE_INTERVAL;
-    while (!stop) {
-      push();
-      if (MAX_SEQUENCE > 0 && seqNum >= MAX_SEQUENCE) {
-        break;
-      }
-      const intervalMs = randomUint() % (upper - lower) + lower;
-      await Promise.any([sleep(intervalMs / 1000), exitSignal]);
-    }
-  })();
-
   // Await close
-  await runner;
+
   if (!stop) {
     const timer = setTimeout(() => {
       exitResolve(); // Assume all sequences are received at this time
-    }, 1500);
+    }, 15);
     await exitSignal;
     clearTimeout(timer);
-  }
-
-  // Write csv file
-  using file = await Deno.create(`./logs/${nodeIdInt}.csv`);
-  await file.write(new TextEncoder().encode('id,seq,delay\n'));
-  for (const item of logRecords) {
-    await file.write(new TextEncoder().encode(`${item.nodeId},${item.seq},${item.delta}\n`));
   }
 
   console.log(`[${nodeIdInt}]Done`);

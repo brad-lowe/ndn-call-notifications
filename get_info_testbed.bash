@@ -6,13 +6,13 @@ while [ $i -ne 1 ]
 do
     i=$(($i+1))
     j=0
-    while [ $j -ne 5 ]
+    while [ $j -ne 1 ]
     do
         export NODE_ID=$(($i*5+$j-5))
         export HOST=${hosts[$j]}
         echo $NODE_ID
         echo $HOST
-        deno task sync_test &
+        deno task get_info &
         j=$(($j+1))
     done
     sleep 1
