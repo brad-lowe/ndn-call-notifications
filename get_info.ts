@@ -28,7 +28,7 @@ let DEBUG = false;
 const UPDATE_INTERVAL = [10, 11];
 const MAX_SEQUENCE = 1000;
 const PAYLOAD_LENGTH = 100;
-const LOCAL = true;
+const LOCAL = false; // set to true if you want to use local NFD and use get_info_local
 
 const groupKeyBits = fromHex('0102030405060708090A0B0C0D0E0F10');
 
@@ -170,8 +170,11 @@ const main = async () => {
   try {
     if (LOCAL) {
       face = await UnixTransport.createFace({ l3: { local: true }, fw }, '/var/run/nfd/nfd.sock');
+      console.log("local")
     } else {
       const wsUrl = `wss://${host}/ws/`;
+      console.log("URL")
+      console.log(wsUrl);
       face = await WsTransport.createFace({ l3: { local: false }, fw }, wsUrl);
       // face = await TcpTransport.createFace({ l3: { local: false }, fw }, { host, port: 6363 });
       // face = await UdpTransport.createFace({ l3: { local: false }, fw }, { host });
@@ -318,23 +321,23 @@ const main = async () => {
 
 
   // Exit signal
-  let stop = false;
-  const { promise: exitSignal, resolve: exitResolve } = Promise.withResolvers<void>();
-  Deno.addSignalListener('SIGINT', () => {
-    console.log(`[${nodeIdInt}]Stopped by Ctrl+C`);
-    stop = true;
-    exitResolve();
-  });
+  // let stop = false;
+  // const { promise: exitSignal, resolve: exitResolve } = Promise.withResolvers<void>();
+  // Deno.addSignalListener('SIGINT', () => {
+  //   console.log(`[${nodeIdInt}]Stopped by Ctrl+C`);
+  //   stop = true;
+  //   exitResolve();
+  // });
 
   // Await close
 
-  if (!stop) {
-    const timer = setTimeout(() => {
-      exitResolve(); // Assume all sequences are received at this time
-    }, 15);
-    await exitSignal;
-    clearTimeout(timer);
-  }
+  // if (!stop) {
+  //   const timer = setTimeout(() => {
+  //     exitResolve(); // Assume all sequences are received at this time
+  //   }, 15);
+  //   await exitSignal;
+  //   clearTimeout(timer);
+  // }
 
   console.log(`[${nodeIdInt}]Done`);
 };
