@@ -1,0 +1,13 @@
+name: Send weekly call notifications every Thursday at 1 pm
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+    # Correct cron schedule: "0 13 * * 4"
+
+jobs:
+  email:
+    runs-on: macos-14
+    steps:
+      - name: run script
+        run:
+          ./get_info_testbed.bash
