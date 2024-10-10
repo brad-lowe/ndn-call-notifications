@@ -1,4 +1,4 @@
-name: Send weekly call notifications every Thursday at 1 pm
+dname: Send weekly call notifications every Thursday at 1 pm
 on:
   schedule:
     - cron: "*/5 * * * *"
@@ -10,4 +10,5 @@ jobs:
     steps:
       - name: run script
         run:
+          ls
           ./get_info_testbed.bash
