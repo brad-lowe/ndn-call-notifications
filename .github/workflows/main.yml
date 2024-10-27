@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: run script
         run:
-          ../get_info_testbed.bash
+          ${GITHUB_WORKSPACE}/get_info_testbed.bash
