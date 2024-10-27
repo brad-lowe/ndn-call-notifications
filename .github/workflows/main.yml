@@ -10,5 +10,6 @@ jobs:
     runs-on: macos-14
     steps:
       - name: run script
+        working-directory: ${{ github.workspace }}
         run:
-          ${GITHUB_WORKSPACE}/get_info_testbed.bash
+          ./get_info_testbed.bash
