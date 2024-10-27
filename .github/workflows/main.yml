@@ -11,5 +11,4 @@ jobs:
     steps:
       - name: run script
         run:
-          ls
-          ./get_info_testbed.bash
+          ../get_info_testbed.bash
