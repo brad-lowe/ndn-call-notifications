@@ -1,7 +1,7 @@
 name: Send weekly call notifications every Thursday at 1 pm
 on:
   schedule:
-    - cron: "*/1 * * * *"
+    - cron: "*/5 * * * *"
     # Correct cron schedule: "0 13 * * 4"
     # For testing: "*/5 * * * *"
 
