@@ -9,6 +9,9 @@ jobs:
   email:
     runs-on: macos-14
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: run script
         working-directory: ${{ github.workspace }}
         run:
