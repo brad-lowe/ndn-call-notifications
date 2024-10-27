@@ -6,7 +6,8 @@
     "gen-selfsign": "deno run gen-selfsign.ts",
     "display-priv": "deno run display-priv.ts",
     "speed-responder": "deno run --allow-net --allow-read --allow-write --allow-env --unstable-kv speed_test/responder.ts",
-    "speed-retriever": "deno run --allow-net --allow-read --allow-write --allow-env --unstable-kv speed_test/retriever.ts"
+    "speed-retriever": "deno run --allow-net --allow-read --allow-write --allow-env --unstable-kv speed_test/retriever.ts",
+    "display-cert-fullname": "deno run --allow-net --allow-read --allow-write --allow-run --allow-env display-cert-fullname.ts --caCertName /ndn/weekly-call-doc/KEY/%A0w%E9%88%23%27%D91/self/v=1729978713422"
   },
   "unstable": [
     "byonm",

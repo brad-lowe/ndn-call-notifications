@@ -12,7 +12,9 @@
       "dependencies": [
         "npm:@syncedstore/core@^0.6.0",
         "npm:@ucla-irl/ndnts-aux@^3.0.1",
+        "npm:execa@^8.0.1",
         "npm:nodemailer@^6.9.15",
+        "npm:yargs@^17.7.2",
         "npm:yjs@^13.6.15"
       ]
     }

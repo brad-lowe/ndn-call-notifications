@@ -258,7 +258,8 @@ const main = async () => {
 
   // Get underlying text from the yDoc
   let yMap = yDoc.getMap('latex')
-  let mainTex = yMap.get('0cf7f234-06cf-4a15-8aa6-7a97ec49cbbc')
+  console.log(yMap)
+  let mainTex = yMap.get('b541bd74-555a-4fd1-96da-83591625fb4b')
   let inner = mainTex.get('text')
   let allText = inner.toString()
 
@@ -321,23 +322,23 @@ const main = async () => {
 
 
   // Exit signal
-  // let stop = false;
-  // const { promise: exitSignal, resolve: exitResolve } = Promise.withResolvers<void>();
-  // Deno.addSignalListener('SIGINT', () => {
-  //   console.log(`[${nodeIdInt}]Stopped by Ctrl+C`);
-  //   stop = true;
-  //   exitResolve();
-  // });
+  let stop = false;
+  const { promise: exitSignal, resolve: exitResolve } = Promise.withResolvers<void>();
+  Deno.addSignalListener('SIGINT', () => {
+    console.log(`[${nodeIdInt}]Stopped by Ctrl+C`);
+    stop = true;
+    exitResolve();
+  });
 
   // Await close
 
-  // if (!stop) {
-  //   const timer = setTimeout(() => {
-  //     exitResolve(); // Assume all sequences are received at this time
-  //   }, 15);
-  //   await exitSignal;
-  //   clearTimeout(timer);
-  // }
+  if (!stop) {
+    const timer = setTimeout(() => {
+      exitResolve(); // Assume all sequences are received at this time
+    }, 15);
+    await exitSignal;
+    clearTimeout(timer);
+  }
 
   console.log(`[${nodeIdInt}]Done`);
 };
