@@ -4,6 +4,7 @@ on:
     - cron: "*/5 * * * *"
     # Correct cron schedule: "0 13 * * 4"
     # For testing: "*/5 * * * *"
+  workflow_dispatch:
 
 jobs:
   email:
@@ -18,4 +19,4 @@ jobs:
       - name: run script
         working-directory: ${{ github.workspace }}
         run:
-          ./get_info_testbed
+          ./get_info_testbed.bash
