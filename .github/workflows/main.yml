@@ -9,10 +9,13 @@ jobs:
   email:
     runs-on: macos-14
     steps:
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2.0.0
+            
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: run script
         working-directory: ${{ github.workspace }}
         run:
-          ls && pwd
+          ./get_info_testbed
