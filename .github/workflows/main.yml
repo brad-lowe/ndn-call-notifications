@@ -15,4 +15,4 @@ jobs:
       - name: run script
         working-directory: ${{ github.workspace }}
         run:
-          ./get_info_testbed.bash
+          ls && pwd
