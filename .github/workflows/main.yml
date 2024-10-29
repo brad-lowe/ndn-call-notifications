@@ -18,7 +18,9 @@ jobs:
 
       - name: Install packages
         uses: actions/setup-node@v4
+
+      - name: Deno install
+        run: deno install node_modules/nodemailer
         
-      - name: run script
-        working-directory: ${{ github.workspace }}
+      - name: Run script
         run: ./get_info_testbed.bash
