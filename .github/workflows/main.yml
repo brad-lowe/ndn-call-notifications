@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-node@v4
 
       - name: Deno install
-        run: deno install -f npm:nodemailer
+        run: deno install npm:nodemailer
         
       - name: Run script
         run: ./get_info_testbed.bash
