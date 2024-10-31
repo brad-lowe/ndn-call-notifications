@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Setup Deno
         uses: denoland/setup-deno@v2.0.0
+        with:
+          deno-version: latest
 
       - name: Checkout branch    
         uses: actions/checkout@v4
