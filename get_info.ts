@@ -259,7 +259,7 @@ const main = async () => {
   // Get underlying text from the yDoc
   let yMap = yDoc.getMap('latex')
   console.log(yMap)
-  let mainTex = yMap.get('b541bd74-555a-4fd1-96da-83591625fb4b')
+  let mainTex = yMap.get('c297195e-87d8-46ee-b475-61aa3d909989')
   let inner = mainTex.get('text')
   let allText = inner.toString()
 
