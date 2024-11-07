@@ -30,6 +30,7 @@ jobs:
         run: |
           echo "@ucla-irl:registry=https://npm.pkg.github.com" >> .npmrc
           echo "//npm.pkg.github.com/:_authToken=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" >> .npmrc
+          rm pnpm-lock.yaml
           pnpm i
         
       - name: Run script
