@@ -29,6 +29,7 @@ jobs:
       - name: Install ndnts-aux
         run: |
           echo "@ucla-irl:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=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" >> .npmrc
           pnpm add @ucla-irl/ndnts-aux
         
       - name: Run script
