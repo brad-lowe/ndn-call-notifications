@@ -20,5 +20,8 @@
     "indentWidth": 2,
     "useTabs": false,
     "semiColons": true
+   },
+  "imports": {
+    "nodemailer": "npm:nodemailer@^6.9.16"
   }
 }

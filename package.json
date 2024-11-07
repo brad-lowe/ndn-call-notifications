@@ -30,7 +30,7 @@
     "@ndn/util": "https://ndnts-nightly.ndn.today/util.tgz",
     "@ndn/ws-transport": "https://ndnts-nightly.ndn.today/ws-transport.tgz",
     "@syncedstore/core": "^0.6.0",
-    "@ucla-irl/ndnts-aux": "^3.0.1",
+    "@ucla-irl/ndnts-aux": "3.0.5",
     "execa": "^8.0.1",
     "nodemailer": "^6.9.15",
     "yargs": "^17.7.2",
