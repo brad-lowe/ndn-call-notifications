@@ -21,8 +21,10 @@ jobs:
       - name: Install packages
         uses: actions/setup-node@v4
 
-      - name: Deno install
-        run: deno install npm:nodemailer
+      - name: Install ndnts-aux
+        run: |
+          echo "@ucla-irl:registry=https://npm.pkg.github.com" >> .npmrc
+          pnpm add @ucla-irl/ndnts-aux
         
       - name: Run script
         run: ./get_info_testbed.bash
