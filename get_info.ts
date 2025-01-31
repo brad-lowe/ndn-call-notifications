@@ -21,6 +21,16 @@ import { fromHex } from '@ndn/util';
 import { syncedStore, getYjsDoc } from '@syncedstore/core'
 import * as fs from 'fs'
 import * as nodemailer from 'nodemailer'
+import { yXmlFragmentToProsemirrorJSON, yXmlFragmentToProseMirrorRootNode } from 'y-prosemirror'
+//import { schema } from 'prosemirror-schema-basic'
+import { MarkdownParser, MarkdownSerializer, defaultMarkdownSerializer } from 'prosemirror-markdown'
+import { DOMSerializer, Node } from "prosemirror-model";
+import { JSDOM } from 'jsdom'
+import { commonmark } from "@milkdown/preset-commonmark"
+import { Editor, rootCtx } from '@milkdown/core'
+import { createSignal, onCleanup, onMount } from 'solid-js'
+import { mySchema } from './my-schema.ts';
+
 
 // Global configurations
 let DEBUG = false;
@@ -257,21 +267,40 @@ const main = async () => {
   await sleep(5);
 
   // Get underlying text from the yDoc
-  let yMap = yDoc.getMap('latex')
-  console.log(yMap)
-  let mainTex = yMap.get('c297195e-87d8-46ee-b475-61aa3d909989')
-  let inner = mainTex.get('text')
-  let allText = inner.toString()
+  const yMap = yDoc.getMap('latex')
+  let file_id = ""
+  //console.log(yMap.get("84870dac-465b-4c89-a38d-6bba4c2c7170"))
+  yMap.forEach((value, id) => {
+    if (value.get("name") == "Issues.md") {
+      file_id = id
+    }
+  })
+  console.log(file_id)
+  let file = yMap.get(file_id)
+  // If you want to choose by id
+  file = yMap.get("802813a1-477f-46aa-a89e-5f580b4e4e23")
+  console.log(file)
 
-  // Find issues from text
-  let startString = "%START"
-  let issueStart = allText.indexOf(startString) + startString.length
 
-  let endString = "%END"
-  let issueEnd = allText.indexOf(endString)
+  const fragment = file.get('prosemirror')
+  const json = yXmlFragmentToProsemirrorJSON(fragment)
+  //console.log(json)
 
-  let issueText = allText.substring(issueStart, issueEnd)
-  console.log(issueText)
+  let dom = new JSDOM('<!DOCTYPE html><div id="content"></div>')
+  let document = dom.window.document
+
+  let target = document.querySelector("div")
+
+  let contentNode = Node.fromJSON(mySchema, json)
+
+  DOMSerializer
+  .fromSchema(mySchema)
+  .serializeFragment(contentNode.content, {
+    "document": document
+  }, target)
+
+  let html = document.getElementById("content").innerHTML
+  console.log(html)
 
   // Read email sample and insert issues
 
@@ -280,33 +309,24 @@ const main = async () => {
   const hr1 = email.indexOf("<hr>") + 4
   const hr2 = email.indexOf("<hr>", hr1)
 
-  email = email.substring(0, hr1) + "\n<p>\n" + issueText + "\n</p>\n" + email.substring(hr2)
+  email = email.substring(0, hr1) + html + email.substring(hr2)
 
   console.log(email)
 
   // Send email via nodemailer
 
-  // from: "noreply@named-data.net"
-  // to:   "bradlowe@g.ucla.edu"
-  // subject: NDN Weekly Call
-  // address: "YOUR.SMTP.SERVER"
-  // domain:  "named-data.net"
-  // port: 587
-  // user_name: "login"
-  // password: "password"
-
   var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'bradlowe@g.ucla.edu',
-      pass: 'fxka ifzx uoyq dqnt'
+      user: Deno.env.get('EMAIL_SENDER'),
+      pass: Deno.env.get('EMAIL_SENDER_PASS')
     }
   });
 
   var mailOptions = {
-    from: 'bradlowe@ucla.edu',
-    to: 'bradlowe@g.ucla.edu',
-    subject: 'NDN Weekly Call TEST EMAIL',
+    from: Deno.env.get('EMAIL_SENDER'),
+    to: Deno.env.get('EMAIL_RECEIVER'),,
+    subject: 'NDN Weekly Call - Workspace Test Email',
     html: email
   };
 
@@ -317,8 +337,6 @@ const main = async () => {
       console.log('Email sent: ' + info.response);
     }
   });
-  
-  
 
 
   // Exit signal

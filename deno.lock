@@ -8,12 +8,34 @@
     "https://deno.land/x/sleep@v1.3.0/sleep.ts": "b6abaca093b094b0c2bba94f287b19a60946a8d15764d168f83fcf555f5bb59e"
   },
   "workspace": {
+    "dependencies": [
+      "npm:nodemailer@^6.9.16"
+    ],
     "packageJson": {
       "dependencies": [
+        "npm:@milkdown/core@^7.5.0",
+        "npm:@milkdown/ctx@^7.5.0",
+        "npm:@milkdown/exception@^7.5.0",
+        "npm:@milkdown/plugin-clipboard@^7.5.0",
+        "npm:@milkdown/plugin-collab@^7.5.0",
+        "npm:@milkdown/plugin-cursor@^7.5.0",
+        "npm:@milkdown/plugin-history@^7.5.0",
+        "npm:@milkdown/plugin-indent@^7.5.0",
+        "npm:@milkdown/preset-commonmark@^7.5.0",
+        "npm:@milkdown/prose@^7.5.0",
+        "npm:@milkdown/theme-nord@^7.5.0",
+        "npm:@milkdown/transformer@^7.5.0",
         "npm:@syncedstore/core@^0.6.0",
-        "npm:@ucla-irl/ndnts-aux@^3.0.1",
+        "npm:@ucla-irl/ndnts-aux@3.0.5",
         "npm:execa@^8.0.1",
+        "npm:jsdom@^25.0.1",
+        "npm:markdown-it@^14.1.0",
         "npm:nodemailer@^6.9.15",
+        "npm:prosemirror-markdown@^1.13.1",
+        "npm:prosemirror-schema-basic@^1.2.3",
+        "npm:prosemirror-schema-list@^1.5.0",
+        "npm:solid-js@^1.9.3",
+        "npm:y-prosemirror@^1.2.15",
         "npm:yargs@^17.7.2",
         "npm:yjs@^13.6.15"
       ]
