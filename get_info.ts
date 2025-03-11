@@ -2,15 +2,13 @@ import { load as loadDotenv } from 'https://deno.land/std@0.214.0/dotenv/mod.ts'
 import { sleep } from 'https://deno.land/x/sleep@v1.3.0/mod.ts';
 import { InMemoryStorage } from '@ucla-irl/ndnts-aux/storage';
 import { Workspace } from '@ucla-irl/ndnts-aux/workspace';
-import { NdnSvsAdaptor } from '@ucla-irl/ndnts-aux/adaptors';
-import { SyncAgent } from '@ucla-irl/ndnts-aux/sync-agent';
 import { AsyncDisposableStack, base64ToBytes } from '@ucla-irl/ndnts-aux/utils';
 import { CertStorage } from '@ucla-irl/ndnts-aux/security';
 import { Decoder } from '@ndn/tlv';
 import { Component, Data, Name, ValidityPeriod } from '@ndn/packet';
 import { Certificate, CertNaming, createSigner, createVerifier, ECDSA } from '@ndn/keychain';
 import { WsTransport } from '@ndn/ws-transport';
-import { TcpTransport, UdpTransport, UnixTransport } from '@ndn/node-transport';
+import { UnixTransport } from '@ndn/node-transport';
 import { digestSigning, Signer } from '@ndn/packet';
 import * as nfdmgmt from '@ndn/nfdmgmt';
 import { Forwarder, FwTracer } from '@ndn/fw';
@@ -22,13 +20,8 @@ import { syncedStore, getYjsDoc } from '@syncedstore/core'
 import * as fs from 'fs'
 import * as nodemailer from 'nodemailer'
 import { yXmlFragmentToProsemirrorJSON, yXmlFragmentToProseMirrorRootNode } from 'y-prosemirror'
-//import { schema } from 'prosemirror-schema-basic'
-import { MarkdownParser, MarkdownSerializer, defaultMarkdownSerializer } from 'prosemirror-markdown'
 import { DOMSerializer, Node } from "prosemirror-model";
 import { JSDOM } from 'jsdom'
-import { commonmark } from "@milkdown/preset-commonmark"
-import { Editor, rootCtx } from '@milkdown/core'
-import { createSignal, onCleanup, onMount } from 'solid-js'
 import { mySchema } from './my-schema.ts';
 
 
@@ -269,7 +262,6 @@ const main = async () => {
   // Get underlying text from the yDoc
   const yMap = yDoc.getMap('latex')
   let file_id = ""
-  //console.log(yMap.get("84870dac-465b-4c89-a38d-6bba4c2c7170"))
   yMap.forEach((value, id) => {
     if (value.get("name") == "Issues.md") {
       file_id = id
@@ -277,14 +269,14 @@ const main = async () => {
   })
   console.log(file_id)
   let file = yMap.get(file_id)
-  // If you want to choose by id
-  file = yMap.get("802813a1-477f-46aa-a89e-5f580b4e4e23")
-  console.log(file)
+  // // NOTE:If you want to choose by id, uncomment these lines:
+  // file = yMap.get("802813a1-477f-46aa-a89e-5f580b4e4e23")
+  // console.log(file)
 
 
   const fragment = file.get('prosemirror')
   const json = yXmlFragmentToProsemirrorJSON(fragment)
-  //console.log(json)
+  console.log(json)
 
   let dom = new JSDOM('<!DOCTYPE html><div id="content"></div>')
   let document = dom.window.document
@@ -325,8 +317,8 @@ const main = async () => {
 
   var mailOptions = {
     from: Deno.env.get('EMAIL_SENDER'),
-    to: Deno.env.get('EMAIL_RECEIVER'),,
-    subject: 'NDN Weekly Call - Workspace Test Email',
+    to: Deno.env.get('EMAIL_RECEIVER'),
+    subject: 'NDN Weekly Call',
     html: email
   };
 
